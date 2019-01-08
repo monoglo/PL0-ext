@@ -1,6 +1,6 @@
 # 已完成的任务 Completed work
 
-1. else语句	else statement
+1. else语句 else statement
     - if A then B **else** C;
 2. for语句 for statement
     - **for** (A; B; C) D;

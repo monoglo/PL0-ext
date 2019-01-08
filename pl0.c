@@ -898,10 +898,10 @@ int statement(bool *fsys, int *ptx, int lev)
 						gendo(sto, lev - table[i].level, table[i].adr);
 					}
 				}
-				else if(sym == plusbec)					//*  +=逻辑运算
+				else if (sym == plusbec) //*  +=逻辑运算
 				{
 					gendo(lod, lev - table[i].level, table[i].adr);
-					getsymdo;	
+					getsymdo;
 					expressiondo(nxtlev, ptx, lev);
 					gendo(opr, 0, 2);
 					if (i != 0)
@@ -910,10 +910,10 @@ int statement(bool *fsys, int *ptx, int lev)
 						gendo(sto, lev - table[i].level, table[i].adr);
 					}
 				}
-				else if(sym == minusbec)				//*  -=逻辑运算
+				else if (sym == minusbec) //*  -=逻辑运算
 				{
 					gendo(lod, lev - table[i].level, table[i].adr);
-					getsymdo;	
+					getsymdo;
 					expressiondo(nxtlev, ptx, lev);
 					gendo(opr, 0, 3);
 					if (i != 0)
@@ -922,10 +922,10 @@ int statement(bool *fsys, int *ptx, int lev)
 						gendo(sto, lev - table[i].level, table[i].adr);
 					}
 				}
-				else if(sym == timesbec)				//*  *=逻辑运算
+				else if (sym == timesbec) //*  *=逻辑运算
 				{
 					gendo(lod, lev - table[i].level, table[i].adr);
-					getsymdo;	
+					getsymdo;
 					expressiondo(nxtlev, ptx, lev);
 					gendo(opr, 0, 4);
 					if (i != 0)
@@ -934,10 +934,10 @@ int statement(bool *fsys, int *ptx, int lev)
 						gendo(sto, lev - table[i].level, table[i].adr);
 					}
 				}
-				else if(sym == slashbec)				//*  /=逻辑运算
+				else if (sym == slashbec) //*  /=逻辑运算
 				{
 					gendo(lod, lev - table[i].level, table[i].adr);
-					getsymdo;	
+					getsymdo;
 					expressiondo(nxtlev, ptx, lev);
 					gendo(opr, 0, 5);
 					if (i != 0)
@@ -946,7 +946,8 @@ int statement(bool *fsys, int *ptx, int lev)
 						gendo(sto, lev - table[i].level, table[i].adr);
 					}
 				}
-				else error(13); /* 没有检测到赋值符号 */
+				else
+					error(13); /* 没有检测到赋值符号 */
 			}
 		} //if (i == 0)
 	}
