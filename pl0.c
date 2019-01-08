@@ -189,11 +189,15 @@ void init()
 	statbegsys[whilesym] = true;
 	statbegsys[readsym] = true;
 	statbegsys[writesym] = true;
+	statbegsys[incsym] = true;
+	statbegsys[decsym] = true;
 
 	/* 设置因子开始符号集 */
 	facbegsys[ident] = true;
 	facbegsys[number] = true;
 	facbegsys[lparen] = true;
+	// facbegsys[incsym] = true;
+	// facbegsys[decsym] = true;
 }
 
 /*
@@ -463,6 +467,11 @@ int getsym()
 									sym = plusbec;
 									getchdo;
 								}
+								else if (ch == '+')
+								{
+									sym = incsym;
+									getchdo;
+								}
 								else
 									sym = plus;
 							}
@@ -474,6 +483,11 @@ int getsym()
 									if (ch == '=')
 									{
 										sym = minusbec;
+										getchdo;
+									}
+									else if (ch == '-')
+									{
+										sym = decsym;
 										getchdo;
 									}
 									else
@@ -887,7 +901,55 @@ int statement(bool *fsys, int *ptx, int lev)
 			else
 			{
 				getsymdo;
-				if (sym == becomes)
+				if (sym == incsym)
+				{
+					getsymdo;
+					if (sym == ident)
+					{
+						i = position(id, *ptx);
+						if (i == 0)
+							error(11);
+						else if (table[i].kind != variable)
+						{
+							error(12);
+							i = 0;
+						}
+						if (i != 0)
+							gendo(lod, lev - table[i].level, table[i].adr);
+						gendo(lit, 0, 1);
+						gendo(lit, 0, 2);
+						if (i != 0)
+							gendo(sto, lev - table[i].level, table[i].adr);
+						getsymdo;
+					}
+					else
+						error(45);
+				}
+				else if (sym == decsym)
+				{
+					getsymdo;
+					if (sym == ident)
+					{
+						i = position(id, *ptx);
+						if (i == 0)
+							error(11);
+						else if (table[i].kind != variable)
+						{
+							error(12);
+							i = 0;
+						}
+						if (i != 0)
+							gendo(lod, lev - table[i].level, table[i].adr);
+						gendo(lit, 0, 1);
+						gendo(lit, 0, 3);
+						if (i != 0)
+							gendo(sto, lev - table[i].level, table[i].adr);
+						getsymdo;
+					}
+					else
+						error(45);
+				}
+				else if (sym == becomes)
 				{
 					getsymdo;
 					memcpy(nxtlev, fsys, sizeof(bool) * symnum);
@@ -1220,6 +1282,7 @@ int statement(bool *fsys, int *ptx, int lev)
 */
 int expression(bool *fsys, int *ptx, int lev)
 {
+	int i;
 	enum symbol addop; /* 用于保存正负号 */
 	bool nxtlev[symnum];
 
@@ -1235,6 +1298,60 @@ int expression(bool *fsys, int *ptx, int lev)
 		{
 			gendo(opr, 0, 1); /* 如果开头为负号生成取负指令 */
 		}
+	}
+	else if (sym == incsym)
+	{ // ++i
+		getsymdo;
+		if (sym == ident)
+		{
+			i = position(id, *ptx);
+			if (i == 0)
+				error(11);
+			else if (table[i].kind != variable)
+			{
+				error(12);
+				i = 0;
+			}
+			if (i != 0)
+				gendo(lod, lev - table[i].level, table[i].adr);
+			gendo(lit, 0, 1);
+			gendo(opr, 0, 2);
+			if (i != 0)
+			{
+				gendo(sto, lev - table[i].level, table[i].adr);
+				gendo(lod, lev - table[i].level, table[i].adr);
+			}
+			getsymdo;
+		}
+		else
+			error(45);
+	}
+	else if (sym == decsym)
+	{ // --i
+		getsymdo;
+		if (sym == ident)
+		{
+			i = position(id, *ptx);
+			if (i == 0)
+				error(11);
+			else if (table[i].kind != variable)
+			{
+				error(12);
+				i = 0;
+			}
+			if (i != 0)
+				gendo(lod, lev - table[i].level, table[i].adr);
+			gendo(lit, 0, 1);
+			gendo(opr, 0, 3);
+			if (i != 0)
+			{
+				gendo(sto, lev - table[i].level, table[i].adr);
+				gendo(lod, lev - table[i].level, table[i].adr);
+			}
+			getsymdo;
+		}
+		else
+			error(45);
 	}
 	else /* 此时表达式被看作项的加减 */
 	{
@@ -1326,6 +1443,29 @@ int factor(bool *fsys, int *ptx, int lev)
 				}
 			}
 			getsymdo;
+			if (sym == incsym || sym == decsym)
+			{
+				gendo(lit, 0, 1); // 将常数 1 放入栈顶
+				if (sym == incsym)
+				{													// i++
+					gendo(opr, 0, 2);								// 次栈顶 = 次栈顶 + 栈顶
+					gendo(sto, lev - table[i].level, table[i].adr); // 将栈顶送入变量单元
+					gendo(lod, lev - table[i].level, table[i].adr); // 将变量送入栈顶
+					// 加了 1 的减去 1
+					gendo(lit, 0, 1);
+					gendo(opr, 0, 3);
+				}
+				else if (sym == decsym)
+				{													// i--
+					gendo(opr, 0, 3);								// 次栈顶 = 次栈顶 - 栈顶
+					gendo(sto, lev - table[i].level, table[i].adr); // 将栈顶送入变量单元
+					gendo(lod, lev - table[i].level, table[i].adr); // 将变量送入栈顶
+					// 减了 1 的加上 1
+					gendo(lit, 0, 1);
+					gendo(opr, 0, 2);
+				}
+				getsymdo;
+			}
 		}
 		else
 		{

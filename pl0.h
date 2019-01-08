@@ -29,9 +29,10 @@ enum symbol {
     beginsym,    endsym,    ifsym,      thensym,   whilesym,
     writesym,    readsym,   dosym,      callsym,   constsym,
     varsym,      procsym,   elsesym,    forsym,
-    plusbec,     minusbec,  timesbec,   slashbec,  
+    plusbec,     minusbec,  timesbec,   slashbec,
+    incsym,      decsym
 };
-#define symnum 38
+#define symnum 40
 
 /* 名字表中的类型 */
 enum object {
